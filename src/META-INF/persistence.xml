@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="us_cities">
+
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+
+		<class>dataset.db.Zips</class>
+
+		<properties>
+			<!-- EclipseLink could create the database schema automatically -->
+			<!-- OBS: Don't enable this since the auto generated schema doesn't work 
+				on MSSQLServer! You could find schema from resource folder for various platforms. -->
+			<property name="eclipselink.ddl-generation" value="none" /> <!-- none, drop-and-create-tables -->
+			<property name="eclipselink.ddl-generation.output-mode"
+				value="both" />
+
+			<!-- Optimize database writes to use batching. -->
+			<property name="eclipselink.jdbc.batch-writing" value="JDBC" />
+
+			<!-- Disable EclipseLink L2 cache by default. -->
+			<property name="eclipselink.cache.shared.default" value="true" />
+
+			<!-- L2 Cache size -->
+			<property name="eclipselink.cache.size" value="5000" />
+
+			<!-- Avoids flush being triggered before every query execution. -->
+			<!-- <property name="eclipselink.persistence-context.flush-mode" value="COMMIT" 
+				/> -->
+
+			<!-- Configure simple SQL logging for demonstration. -->
+			<property name="eclipselink.logging.logger" value="DefaultLogger" />
+			<property name="eclipselink.logging.file" value="logs/EclipseLink.log" />
+			<property name="eclipselink.logging.level" value="INFO" />
+			<property name="eclipselink.logging.thread" value="true" />
+			<property name="eclipselink.logging.session" value="true" />
+			<property name="eclipselink.logging.exceptions" value="true" />
+			<property name="eclipselink.logging.timestamp" value="true" />
+
+		</properties>
+
+	</persistence-unit>
+</persistence>

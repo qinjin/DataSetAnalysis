@@ -7,7 +7,7 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import dataset.twitter.ConfReader;
+import dataset.utils.ConfReader;
 
 /**
  * Analyze locality and Number of followers.

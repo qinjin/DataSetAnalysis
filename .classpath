@@ -4,5 +4,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/db/mysql_5.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/google-guava/guava-14.0.1.jar" sourcepath="lib/google-guava/guava-14.0.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/eclipseLink/eclipselink.jar" sourcepath="lib/eclipseLink/eclipselink-src.zip"/>
+	<classpathentry kind="lib" path="lib/eclipseLink/javax.persistence_2.0.4.v201112161009.jar"/>
+	<classpathentry kind="lib" path="lib/eclipseLink/javax.persistence.source_2.0.4.v201112161009.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
