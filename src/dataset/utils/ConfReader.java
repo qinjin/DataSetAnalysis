@@ -10,9 +10,9 @@ public class ConfReader {
 
 	public ConfReader() {
 		configuration = new Properties();
-		String confStr = "conf/dataset.conf";
+		String confStr = "conf"+File.separator+"dataset.conf";
 		try {
-			configuration.load(new FileInputStream(confStr));
+			configuration.load(new FileInputStream(new File(confStr)));
 		} catch (IOException e) {
 			System.err.println("Failed to load configuration " + confStr);
 			e.printStackTrace();
