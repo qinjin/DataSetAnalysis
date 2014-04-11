@@ -54,4 +54,13 @@ public class DBProvider {
 	public List<Zips> getAllZips(){
 		return entityManager.createNamedQuery("findAllZips",Zips.class).getResultList();
 	}
+	
+	public Map<String, String> getCityStateMap(){
+		 Map<String, String>  map = Maps.newHashMap();
+		 List<Zips> zips = getAllZips();
+		 for(Zips zip: zips){
+			 map.put(zip.getCity(), zip.getState());
+		 }
+		 return map;
+	}
 }

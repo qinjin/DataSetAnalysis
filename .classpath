@@ -8,5 +8,7 @@
 	<classpathentry kind="lib" path="lib/eclipseLink/eclipselink.jar" sourcepath="lib/eclipseLink/eclipselink-src.zip"/>
 	<classpathentry kind="lib" path="lib/eclipseLink/javax.persistence_2.0.4.v201112161009.jar"/>
 	<classpathentry kind="lib" path="lib/eclipseLink/javax.persistence.source_2.0.4.v201112161009.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.17/jcommon-1.0.21.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.17/jfreechart-1.0.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

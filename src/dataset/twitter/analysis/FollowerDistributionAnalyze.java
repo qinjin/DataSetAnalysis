@@ -27,28 +27,40 @@ import dataset.utils.ConfReader;
  */
 public class FollowerDistributionAnalyze implements IAnalyze {
 	
-	private final List<Zips> allZips;
+	private final Map<String, String> allCityStateMap;
 	
 	public FollowerDistributionAnalyze(){
-		allZips = DBProvider.getInstance().getAllZips();;
+		allCityStateMap = DBProvider.getInstance().getCityStateMap();
 	}
 
 	public void executeAnalyze() {
 		ConfReader confReader = new ConfReader();
-
 		try{
 			File profileFile = confReader.getProfilerFile();
 			System.out.println("Start to read profile file at: "+new Date());
 			List<String> allLines = Files.readLines(profileFile, Charset.defaultCharset());
 			System.out.println("Done read profile file at: "+new Date());
-			List<UserProfiler> allProfiles = parseAllUserProfilesToState(allZips, allLines);
+			List<UserProfiler> allProfiles = parseAllUserProfilesToState(allCityStateMap, allLines);
 
 			//[num followers, num follower from another region]
 			Map<Integer, Integer> followerRegionMap = calculateFollowerRegions(allProfiles);
 		} catch(Exception ex){
 			ex.printStackTrace();
 		}
-		
+	}
+	
+	private List<UserProfiler> parseAllUserProfilesToState(Map<String, String> allCityStateMap,
+			List<String> allLines) {
+		List<UserProfiler> allProfilers = Lists.newArrayList();
+		for(String line : allLines){
+			try{
+				UserProfiler profiler = new UserProfiler(line, allCityStateMap);
+				System.out.println("User "+ profiler.id +" followers "+profiler.followers+ " location "+profiler.location);
+			}catch(Exception ex){
+				System.err.println(ex);
+			} 
+		}
+		return allProfilers;
 	}
 
 	private Map<Integer, Integer> calculateFollowerRegions(
@@ -56,10 +68,5 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 		return Maps.newHashMap();
 	}
 
-	private List<UserProfiler> parseAllUserProfilesToState(List<Zips> allZips,
-			List<String> allLines) {
-		//TODO
-		List<UserProfiler> allProfilers = Lists.newArrayList();
-		return allProfilers;
-	}
+	
 }
