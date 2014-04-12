@@ -16,7 +16,8 @@ public class UserProfiler {
 	public final Integer age;
 	public final String location;
 
-	public UserProfiler(String str, Map<String, String> allCityStateMap) throws Exception {
+	public UserProfiler(String str, Map<String, String> allCityStateMap)
+			throws Exception {
 		if (str == null || str.isEmpty()) {
 			throw new Exception("Exception on parsing profiler: null or empty");
 		}
@@ -30,8 +31,8 @@ public class UserProfiler {
 
 		if (splited.length != 8) {
 			throw new Exception(
-					"Exception on parsing profiler: the splited length is "+splited.length+"!=8. String: "
-							+ str);
+					"Exception on parsing profiler: the splited length is "
+							+ splited.length + "!=8. String: " + str);
 		}
 
 		// Id
@@ -87,11 +88,12 @@ public class UserProfiler {
 			temp = -1;
 		}
 		age = temp;
-		
-		//Location
+
+		// Location
 		location = allCityStateMap.get(splited[7]);
-		if(location ==null){
-			throw new Exception("Exception on parsing profiler: Unknow location "+str);
-		}
+		// if(location ==null){
+		// throw new
+		// Exception("Exception on parsing profiler: Unknown location "+str);
+		// }
 	}
 }
