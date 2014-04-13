@@ -19,6 +19,7 @@ public class AnalysisMain {
 		
 		for(IAnalyze analyze: analysis){
 			analyze.executeAnalyze();
+			analyze.drawResult();
 		}
 	}
 }

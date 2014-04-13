@@ -14,4 +14,10 @@ public class TweetLocationAnalyze implements IAnalyze {
 
 	}
 
+	@Override
+	public void drawResult() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
