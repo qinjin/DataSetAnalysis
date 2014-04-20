@@ -2,6 +2,7 @@ package dataset.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,8 @@ public class AnalyzeUtils {
 	List<String> lines = Files.readLines(file, Charset.defaultCharset());
 	Map<Integer, Integer> dataSet = Maps.newHashMap();
 	for (String line : lines) {
-	    String[] splited = line.split("|");
+	    String[] splited = line.split(";");
+	    System.out.println("Splited length: "+splited.length);
 	    for (String str : splited) {
 		String[] pair = str.split("=");
 		if (pair.length == 2) {
@@ -92,7 +94,7 @@ public class AnalyzeUtils {
 			    Charset.defaultCharset());
 		    first = false;
 		} else {
-		    Files.append("|" + entry.getKey() + "=" + entry.getValue(),
+		    Files.append(";" + entry.getKey() + "=" + entry.getValue(),
 			    file, Charset.defaultCharset());
 		}
 	    }
@@ -102,4 +104,8 @@ public class AnalyzeUtils {
 	    ex.printStackTrace();
 	}
     }
+
+//    public static Map<BigDecimal, BigDecimal> simplefilter(int keyMax, int keyMin, int valueMax, int valueMin, Map<BigDecimal, BigDecimal> resultMap) {
+//	return null;
+//    }
 }

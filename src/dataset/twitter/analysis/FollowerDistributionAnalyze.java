@@ -19,7 +19,7 @@ import dataset.utils.AnalyzeUtils;
  */
 public class FollowerDistributionAnalyze implements IAnalyze {
     public static final String CACHED_FOLLOWER_NUMBER_FILE = "output/follower_number_distribution.txt";
-    final Map<Integer, Integer> followerNumberDistribution;
+    private final Map<Integer, Integer> followerNumberDistribution;
 
     public FollowerDistributionAnalyze() {
 	followerNumberDistribution = Maps.newHashMap();
@@ -59,11 +59,15 @@ public class FollowerDistributionAnalyze implements IAnalyze {
     @Override
     public void drawResult() {
 	System.out.println("Drawing follower number distribution...");
+	ChartUtils.drawChart("", "Follower number distribution",
+		"Number of followers", "Number of users",
+		"follower_number_distribution", AnalyzeUtils.simplefilter(-1,
+			-1, -1, 1, followerNumberDistribution));
 	// Filter to remove the follower number is bigger than 1999 and the user
 	// number is smaller than 2.
 	ChartUtils.drawChart("", "Follower number distribution",
 		"Number of followers", "Number of users",
-		"follower_number_distribution", AnalyzeUtils.simplefilter(2000,
+		"follower_number_distribution_0_2000", AnalyzeUtils.simplefilter(2000,
 			-1, -1, 1, followerNumberDistribution));
 	System.out.println("Done drawing follower number distribution");
     }

@@ -1,9 +1,6 @@
 package dataset.twitter.analysis;
 
-import java.util.List;
 import java.util.Map;
-
-import dataset.db.Zips;
 
 public class UserProfiler {
 

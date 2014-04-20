@@ -58,6 +58,14 @@ public class NumTweetsAnalyze implements IAnalyze {
 		"Number of followers", "Number of tweets",
 		"follower_tweets_distribution", AnalyzeUtils.simplefilter(-1,
 			-1, -1, -1, followerNumberTweetsMap));
+	ChartUtils.drawChart("", "Follower and Tweets number distribution",
+		"Number of followers", "Number of tweets",
+		"follower_tweets_distribution_0_2000", AnalyzeUtils.simplefilter(2000,
+			-1, -1, -1, followerNumberTweetsMap));
+	ChartUtils.drawChart("", "Follower and Tweets number distribution",
+		"Number of followers", "Number of tweets",
+		"follower_tweets_distribution_0_100000", AnalyzeUtils.simplefilter(100000,
+			-1, -1, -1, followerNumberTweetsMap));
 	System.out.println("Done process follower tweets distribution");
     }
 
