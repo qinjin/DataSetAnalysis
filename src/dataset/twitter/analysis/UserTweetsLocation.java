@@ -18,8 +18,8 @@ public class UserTweetsLocation {
 	if(timezoneTweetsMap.get(timezone) == null){
 	    timezoneTweetsMap.put(timezone, 1);
 	} else {
-	    int neNum = timezoneTweetsMap.get(timezone)+1;
-	    timezoneTweetsMap.put(timezone, neNum);
+	    int newNum = timezoneTweetsMap.get(timezone)+1;
+	    timezoneTweetsMap.put(timezone, newNum);
 	}
     }
     

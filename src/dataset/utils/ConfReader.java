@@ -38,6 +38,10 @@ public class ConfReader {
 	return new File(
 		configuration.getProperty("dataset.twitter.network.file"));
     }
+    
+    public File getNetworkDir(){
+	return new File(configuration.getProperty("dataset.twitter.network.dir"));
+    }
 
     public File getTweetsDir() {
 	return new File(configuration.getProperty("dataset.twitter.tweets.dir"));

@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 
@@ -54,7 +55,7 @@ public class AnalyzeUtils {
 	Map<Integer, Integer> dataSet = Maps.newHashMap();
 	for (String line : lines) {
 	    String[] splited = line.split(";");
-	    System.out.println("Splited length: "+splited.length);
+	    System.out.println("Splited length: " + splited.length);
 	    for (String str : splited) {
 		String[] pair = str.split("=");
 		if (pair.length == 2) {
@@ -105,7 +106,31 @@ public class AnalyzeUtils {
 	}
     }
 
-//    public static Map<BigDecimal, BigDecimal> simplefilter(int keyMax, int keyMin, int valueMax, int valueMin, Map<BigDecimal, BigDecimal> resultMap) {
-//	return null;
-//    }
+    public static Map<? extends Integer, ? extends List<Integer>> readAggratedFromFile(
+	    File file, String splitRegex) throws IOException {
+	Map<Integer, List<Integer>> map = Maps.newHashMap();
+	List<String> lines = Files.readLines(file, Charset.defaultCharset());
+	for (String line : lines) {
+	    String[] splited = line.split(splitRegex);
+	    if (splited.length == 2) {
+		int id = Integer.valueOf(splited[0]);
+		int followerId = Integer.valueOf(splited[1]);
+		if (map.get(id) == null) {
+		    List<Integer> followers = Lists.newArrayList();
+		    followers.add(followerId);
+		    map.put(id, followers);
+		} else {
+		    map.get(id).add(followerId);
+		}
+	    }
+	}
+	System.out.println("Read "+map.size()+" id-followers from file");
+	return map;
+    }
+
+    // public static Map<BigDecimal, BigDecimal> simplefilter(int keyMax, int
+    // keyMin, int valueMax, int valueMin, Map<BigDecimal, BigDecimal>
+    // resultMap) {
+    // return null;
+    // }
 }

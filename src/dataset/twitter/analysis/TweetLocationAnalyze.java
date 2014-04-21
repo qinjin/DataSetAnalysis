@@ -23,6 +23,8 @@ import dataset.utils.ConfReader;
  *
  */
 public class TweetLocationAnalyze implements IAnalyze {
+    private static final String TWEET_LOCATION_DISTRIBUTION = "3_tweet_location_distribution";
+    //[user ID, percentage of the tweets from the most tweeted timezone]
     private final Map<BigDecimal, BigDecimal> tweetsLocationMap;
 
     public TweetLocationAnalyze() {
@@ -63,20 +65,10 @@ public class TweetLocationAnalyze implements IAnalyze {
 	    try {
 		List<String> lines = Files.readLines(file,
 			Charset.defaultCharset());
-		BigDecimal currentID = null;
+		BigDecimal currentID = BigDecimal.valueOf(Long.valueOf(file.getName()));
 		for (String line : lines) {
-		    // ID should always before Time.
-		    if (line.startsWith("ID")) {
-			currentID = null;
-			String id = parseID(line);
-			if (!id.isEmpty()) {
-			    try{
-				currentID = new BigDecimal(id);
-			    }catch(Throwable th){
-				System.err.println("Error: id "+id+ " is not a BigDecimal.");
-			    }
-			}
-		    } else if (line.startsWith("Time") && currentID != null) {
+		    //Parse time zone.
+		    if (line.startsWith("Time") && currentID != null) {
 			if (map.get(currentID) == null) {
 			    map.put(currentID,
 				    new UserTweetsLocation(currentID));
@@ -128,7 +120,7 @@ public class TweetLocationAnalyze implements IAnalyze {
 	System.out.println("Drawing tweet location distribution...");
 	ChartUtils.drawDecimalChart("", "Tweet location distribution",
 		"User IDs", "Tweet location centerlization",
-		"tweet_location_distribution", tweetsLocationMap);
+		TWEET_LOCATION_DISTRIBUTION, tweetsLocationMap);
 	System.out.println("Done drawing tweet location  distribution");
 
     }

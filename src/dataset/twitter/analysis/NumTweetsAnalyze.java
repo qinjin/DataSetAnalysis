@@ -19,7 +19,9 @@ import dataset.utils.AnalyzeUtils;
  *
  */
 public class NumTweetsAnalyze implements IAnalyze {
-    public static final String CACHED_TWEETS_NUMBER_FILE = "output/tweets_number_distribution.txt";
+    public static final String FOLLOWER_TWEETS_DISTRIBUTION = "2_follower_tweets_distribution";
+    public static final String CACHED_TWEETS_NUMBER_FILE = "output/"+FOLLOWER_TWEETS_DISTRIBUTION+".txt";
+    //[Num of followers, Avg tweets]
     private final Map<Integer, Integer> followerNumberTweetsMap = Maps
 	    .newHashMap();
 
@@ -55,32 +57,43 @@ public class NumTweetsAnalyze implements IAnalyze {
     public void drawResult() {
 	System.out.println("Drawing follower tweets distribution...");
 	ChartUtils.drawChart("", "Follower and Tweets number distribution",
-		"Number of followers", "Number of tweets",
-		"follower_tweets_distribution", AnalyzeUtils.simplefilter(-1,
+		"Number of followers", "Avg number of tweets",
+		FOLLOWER_TWEETS_DISTRIBUTION, AnalyzeUtils.simplefilter(-1,
 			-1, -1, -1, followerNumberTweetsMap));
 	ChartUtils.drawChart("", "Follower and Tweets number distribution",
-		"Number of followers", "Number of tweets",
-		"follower_tweets_distribution_0_2000", AnalyzeUtils.simplefilter(2000,
+		"Number of followers", "Avg number tweets",
+		FOLLOWER_TWEETS_DISTRIBUTION+"_0_2000", AnalyzeUtils.simplefilter(2000,
 			-1, -1, -1, followerNumberTweetsMap));
 	ChartUtils.drawChart("", "Follower and Tweets number distribution",
-		"Number of followers", "Number of tweets",
-		"follower_tweets_distribution_0_100000", AnalyzeUtils.simplefilter(100000,
+		"Number of followers", "Avg number tweets",
+		FOLLOWER_TWEETS_DISTRIBUTION+"_0_100000", AnalyzeUtils.simplefilter(100000,
 			-1, -1, -1, followerNumberTweetsMap));
 	System.out.println("Done process follower tweets distribution");
     }
 
     private Map<Integer, Integer> calcFollowerNumTweetsMap(
 	    List<UserProfiler> allProfilers) {
-	Map<Integer, Integer> result = Maps.newHashMap();
+	Map<Integer, Integer> numTweetsMap = Maps.newHashMap();
+	Map<Integer, Integer>counterMap = Maps.newHashMap();
+	
 	for (UserProfiler user : allProfilers) {
-	    if (result.get(user.followers) == null) {
-		result.put(user.followers, user.status);
+	    if (numTweetsMap.get(user.followers) == null) {
+		numTweetsMap.put(user.followers, user.status);
+		counterMap.put(user.followers, 1);
 	    } else {
-		int numTweets = result.get(user.followers) + user.status;
-		result.put(user.followers, numTweets);
+		int numTweets = numTweetsMap.get(user.followers) + user.status;
+		int newCounter = counterMap.get(user.followers)+1;
+		numTweetsMap.put(user.followers, numTweets);
+		counterMap.put(user.followers, newCounter);
 	    }
 	}
-	return result;
+	
+	Map<Integer, Integer> resultMap = Maps.newHashMap();
+	
+	for(Map.Entry<Integer, Integer> entry: numTweetsMap.entrySet()){
+	    resultMap.put(entry.getKey(), entry.getValue()/counterMap.get(entry.getKey()));
+	}
+	return resultMap;
     }
 
 }
