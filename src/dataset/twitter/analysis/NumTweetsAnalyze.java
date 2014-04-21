@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.google.common.collect.Maps;
 
 import dataset.chart.ChartUtils;
@@ -19,6 +22,7 @@ import dataset.utils.AnalyzeUtils;
  *
  */
 public class NumTweetsAnalyze implements IAnalyze {
+    private static final Logger logger = LogManager.getLogger(NumTweetsAnalyze.class);
     public static final String FOLLOWER_TWEETS_DISTRIBUTION = "2_follower_tweets_distribution";
     public static final String CACHED_TWEETS_NUMBER_FILE = "output/"+FOLLOWER_TWEETS_DISTRIBUTION+".txt";
     //[Num of followers, Avg tweets]
@@ -30,13 +34,11 @@ public class NumTweetsAnalyze implements IAnalyze {
 	try {
 	    final File tweetsNumberFile = new File(CACHED_TWEETS_NUMBER_FILE);
 	    if (tweetsNumberFile.exists()) {
-		System.out
-			.println("Read tweets number distribution from cached file");
+		logger.debug("Read tweets number distribution from cached file");
 		followerNumberTweetsMap.putAll(AnalyzeUtils
 			.readFromFile(tweetsNumberFile));
 	    } else {
-		System.out
-			.println("Start to process tweets number distribution");
+		logger.debug("Start to process tweets number distribution");
 		ConfReader confReader = new ConfReader();
 		List<UserProfiler> allProfilers = confReader
 			.getAllUserProfilers(DBProvider.getInstance()
@@ -48,14 +50,14 @@ public class NumTweetsAnalyze implements IAnalyze {
 	    }
 
 	} catch (Exception ex) {
-	    System.err.println("Error on " + this.getClass().getSimpleName());
+	    logger.fatal("Error on " + this.getClass().getSimpleName());
 	    ex.printStackTrace();
 	}
     }
 
     @Override
     public void drawResult() {
-	System.out.println("Drawing follower tweets distribution...");
+	logger.info("Drawing follower tweets distribution...");
 	ChartUtils.drawChart("", "Follower and Tweets number distribution",
 		"Number of followers", "Avg number of tweets",
 		FOLLOWER_TWEETS_DISTRIBUTION, AnalyzeUtils.simplefilter(-1,
@@ -68,7 +70,7 @@ public class NumTweetsAnalyze implements IAnalyze {
 		"Number of followers", "Avg number tweets",
 		FOLLOWER_TWEETS_DISTRIBUTION+"_0_100000", AnalyzeUtils.simplefilter(100000,
 			-1, -1, -1, followerNumberTweetsMap));
-	System.out.println("Done process follower tweets distribution");
+	logger.info("Done process follower tweets distribution");
     }
 
     private Map<Integer, Integer> calcFollowerNumTweetsMap(

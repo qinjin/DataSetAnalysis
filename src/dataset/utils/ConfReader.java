@@ -9,12 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
+import dataset.twitter.analysis.FollowerDistributionAnalyze;
 import dataset.twitter.analysis.UserProfiler;
 
 public class ConfReader {
+    private static final Logger logger = LogManager.getLogger(ConfReader.class);
     private static final List<UserProfiler> allProfiles =  Lists.newArrayList();
     private final Properties configuration;
 
@@ -24,7 +29,7 @@ public class ConfReader {
 	try {
 	    configuration.load(new FileInputStream(new File(confStr)));
 	} catch (IOException e) {
-	    System.err.println("Failed to load configuration " + confStr);
+	    logger.fatal("Failed to load configuration " + confStr);
 	    e.printStackTrace();
 	}
     }
@@ -51,17 +56,17 @@ public class ConfReader {
 	    Map<String, String> allCityStateMap) throws Exception {
 	if (allProfiles.isEmpty()) {
 	    File profileFile = getProfilerFile();
-	    System.out.println("Start to read profile file at: " + new Date());
+	    logger.debug("Start to read profile file at: " + new Date());
 	    List<String> allLines = Files.readLines(profileFile,
 		    Charset.defaultCharset());
-	    System.out.println("Done read profile file at: " + new Date());
+	    logger.debug("Done read profile file at: " + new Date());
 	    allProfiles.addAll(parseAllUserProfilesToState(allCityStateMap,
 		    allLines));
 
-	    System.out.println("Analyzed " + allProfiles.size()
+	    logger.info("Analyzed " + allProfiles.size()
 		    + " user profilers from " + allLines.size() + " records.");
 	} else {
-	    System.out.println("Read all user profilers from cache.");
+	    logger.info("Read all user profilers from cache.");
 	}
 
 	return allProfiles;
@@ -78,7 +83,7 @@ public class ConfReader {
 		// +" followers "+profiler.followers+
 		// " location "+profiler.location);
 	    } catch (Exception ex) {
-		// System.err.println(ex);
+		// logger.fatal(ex);
 	    }
 	}
 	return allProfilers;

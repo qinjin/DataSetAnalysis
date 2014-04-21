@@ -8,6 +8,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.google.common.collect.Maps;
 
 import dataset.chart.ChartUtils;
@@ -22,6 +25,7 @@ import dataset.utils.AnalyzeUtils;
  *
  */
 public class FollowerDistributionAnalyze implements IAnalyze {
+    private static final Logger logger = LogManager.getLogger(FollowerDistributionAnalyze.class);
     public static final String FOLLOWER_NUMBER = "1_follower_number_distribution";
     public static final String FOLLOWER_REGION = "1_follower_region_distribution";
     public static final String CACHED_FOLLOWER_NUMBER_FILE = "output/"
@@ -45,7 +49,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 	    processFollowerNumbers(confReader);
 	    processFollowerRegions(confReader);
 	} catch (Exception ex) {
-	    System.err.println("Error on " + this.getClass().getSimpleName());
+	    logger.fatal("Error on " + this.getClass().getSimpleName());
 	    ex.printStackTrace();
 	}
     }
@@ -53,13 +57,11 @@ public class FollowerDistributionAnalyze implements IAnalyze {
     private void processFollowerNumbers(ConfReader confReader) throws Exception {
 	final File followerNumberFile = new File(CACHED_FOLLOWER_NUMBER_FILE);
 	if (followerNumberFile.exists()) {
-	    System.out
-		    .println("Read follower number distribution from cached file");
+	    logger.debug("Read follower number distribution from cached file");
 	    followerNumberDistribution.putAll(AnalyzeUtils
 		    .readFromFile(followerNumberFile));
 	} else {
-	    System.out
-		    .println("Start to process follower number distribution...");
+	    logger.debug("Start to process follower number distribution...");
 	    List<UserProfiler> allProfiles = confReader
 		    .getAllUserProfilers(DBProvider.getInstance()
 			    .getCityStateMap());
@@ -73,13 +75,11 @@ public class FollowerDistributionAnalyze implements IAnalyze {
     private void processFollowerRegions(ConfReader confReader) throws Exception {
 	final File followerRegionFile = new File(CACHED_FOLLOWER_REGION_FILE);
 	if (followerRegionFile.exists()) {
-	    System.out
-		    .println("Read follower region distribution from cached file");
+	    logger.debug("Read follower region distribution from cached file");
 	    followerRegionDistribution.putAll(AnalyzeUtils
 		    .readFromFile(followerRegionFile));
 	} else {
-	    System.out
-		    .println("Start to process follower region distribution...");
+	    logger.debug("Start to process follower region distribution...");
 	    List<UserProfiler> allProfiles = confReader
 		    .getAllUserProfilers(DBProvider.getInstance()
 			    .getCityStateMap());
@@ -107,7 +107,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 	final CountDownLatch latch = new CountDownLatch(
 		networkDir.list().length);
 	for (final File file : networkDir.listFiles()) {
-	    System.out.println("Start to process follower network file:"
+	    logger.debug("Start to process follower network file:"
 		    + file.getName());
 	    Runnable task = new Runnable() {
 
@@ -117,8 +117,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 			followersNetwork.putAll(AnalyzeUtils
 				.readAggratedFromFile(file, "\t"));
 		    } catch (IOException e) {
-			System.err
-				.println("Error on read aggragated id-followers");
+			logger.fatal("Error on read aggragated id-followers");
 			e.printStackTrace();
 		    }
 
@@ -131,7 +130,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 
 	latch.await();
 	executor.shutdown();
-	System.out.println("Done to process all follower network files");
+	logger.info("Done to process all follower network files");
     }
 
     @Override
@@ -141,7 +140,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
     }
 
     private void drawFollowerNumberDistribution() {
-	System.out.println("Drawing follower number distribution...");
+	logger.info("Drawing follower number distribution...");
 	ChartUtils.drawChart("", "Follower number distribution",
 		"Number of followers", "Number of users",
 		FOLLOWER_NUMBER, AnalyzeUtils.simplefilter(-1,
@@ -153,11 +152,11 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 		FOLLOWER_NUMBER+"_0_2000", AnalyzeUtils
 			.simplefilter(2000, -1, -1, 1,
 				followerNumberDistribution));
-	System.out.println("Done drawing follower number distribution");
+	logger.info("Done drawing follower number distribution");
     }
 
     private void drawFollowerRegionDistribution() {
-	System.out.println("Drawing follower region distribution...");
+	logger.info("Drawing follower region distribution...");
 	ChartUtils.drawChart("", "Follower region distribution",
 		"Number of followers", "Number of regions",
 		FOLLOWER_REGION, AnalyzeUtils.simplefilter(-1,
@@ -169,7 +168,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 		FOLLOWER_REGION+"_0_2000", AnalyzeUtils
 			.simplefilter(2000, -1, -1, 1,
 				followerRegionDistribution));
-	System.out.println("Done drawing follower region distribution");
+	logger.info("Done drawing follower region distribution");
     }
 
     /**

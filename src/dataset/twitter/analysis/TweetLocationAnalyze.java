@@ -7,6 +7,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,6 +25,7 @@ import dataset.utils.ConfReader;
  *
  */
 public class TweetLocationAnalyze implements IAnalyze {
+    private static final Logger logger = LogManager.getLogger(TweetLocationAnalyze.class);
     private static final String TWEET_LOCATION_DISTRIBUTION = "3_tweet_location_distribution";
     //[user ID, percentage of the tweets from the most tweeted timezone]
     private final Map<BigDecimal, BigDecimal> tweetsLocationMap;
@@ -33,7 +36,7 @@ public class TweetLocationAnalyze implements IAnalyze {
 
     @Override
     public void executeAnalyze() {
-	System.out.println("Started to analyze tweet location...");
+	logger.info("Started to analyze tweet location...");
 	try {
 	    ConfReader confReader = new ConfReader();
 	    File tweetsDir = confReader.getTweetsDir();
@@ -43,7 +46,7 @@ public class TweetLocationAnalyze implements IAnalyze {
 		throw new Exception("Can not find dir: " + tweetsDir);
 	    }
 	} catch (Exception ex) {
-	    System.err.println("Error on " + this.getClass().getSimpleName()
+	    logger.fatal("Error on " + this.getClass().getSimpleName()
 		    + ": " + ex.getMessage());
 	    ex.printStackTrace();
 	}
@@ -81,7 +84,7 @@ public class TweetLocationAnalyze implements IAnalyze {
 		    }
 		}
 	    } catch (IOException e) {
-		System.err.println("Error on parse file " + file + ": "
+		logger.fatal("Error on parse file " + file + ": "
 			+ e.getMessage());
 	    }
 	}
@@ -94,7 +97,7 @@ public class TweetLocationAnalyze implements IAnalyze {
     // Time record is like: Time: Wed Dec 15 08:30:53 CST 2010
     private String parseTimeZone(String timeRecord) {
 	if (timeRecord.length() < 9) {
-	    System.err.println("Error format for Time: " + timeRecord);
+	    logger.fatal("Error format for Time: " + timeRecord);
 	    return "";
 	}
 
@@ -111,17 +114,17 @@ public class TweetLocationAnalyze implements IAnalyze {
 		    .calcTweetsFromOneTimeZonePercentage());
 	}
 
-	System.out.println("Caclulated percentage.");
+	logger.debug("Caclulated percentage.");
 	return percentageMap;
     }
 
     @Override
     public void drawResult() {
-	System.out.println("Drawing tweet location distribution...");
+	logger.info("Drawing tweet location distribution...");
 	ChartUtils.drawDecimalChart("", "Tweet location distribution",
 		"User IDs", "Tweet location centerlization",
 		TWEET_LOCATION_DISTRIBUTION, tweetsLocationMap);
-	System.out.println("Done drawing tweet location  distribution");
+	logger.info("Done drawing tweet location  distribution");
 
     }
 

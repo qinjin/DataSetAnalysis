@@ -7,11 +7,17 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 
+import dataset.twitter.analysis.TweetLocationAnalyze;
+
 public class AnalyzeUtils {
+    private static final Logger logger = LogManager.getLogger(AnalyzeUtils.class);
     /**
      * Filter the result before drawing the plot.
      * 
@@ -38,7 +44,7 @@ public class AnalyzeUtils {
 	    }
 	}
 
-	System.out.println("The result is filtered before plot.");
+	logger.debug("The result is filtered before plot.");
 	return filtered;
     }
 
@@ -55,7 +61,7 @@ public class AnalyzeUtils {
 	Map<Integer, Integer> dataSet = Maps.newHashMap();
 	for (String line : lines) {
 	    String[] splited = line.split(";");
-	    System.out.println("Splited length: " + splited.length);
+	    logger.debug(file.getName() + " splited length: " + splited.length);
 	    for (String str : splited) {
 		String[] pair = str.split("=");
 		if (pair.length == 2) {
@@ -99,7 +105,7 @@ public class AnalyzeUtils {
 			    file, Charset.defaultCharset());
 		}
 	    }
-	    System.out.println("Saved to file " + file);
+	logger.info("Saved to data to file " + file);
 	} catch (Exception ex) {
 	    System.err.println("Can not save data to file: " + file.toString());
 	    ex.printStackTrace();
@@ -124,7 +130,7 @@ public class AnalyzeUtils {
 		}
 	    }
 	}
-	System.out.println("Read "+map.size()+" id-followers from file");
+	logger.info("Read "+map.size()+" id-followers from file");
 	return map;
     }
 
