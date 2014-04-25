@@ -31,6 +31,7 @@ public class NumTweetsAnalyze implements IAnalyze {
 
     @Override
     public void executeAnalyze() {
+	logger.info("START ANALYZE "+this.getClass().getSimpleName());
 	try {
 	    final File tweetsNumberFile = new File(CACHED_TWEETS_NUMBER_FILE);
 	    if (tweetsNumberFile.exists()) {
@@ -70,7 +71,7 @@ public class NumTweetsAnalyze implements IAnalyze {
 		"Number of followers", "Avg number tweets",
 		FOLLOWER_TWEETS_DISTRIBUTION+"_0_100000", AnalyzeUtils.simplefilter(100000,
 			-1, -1, -1, followerNumberTweetsMap));
-	logger.info("Done process follower tweets distribution");
+	logger.info("DOND ANALYZE "+this.getClass().getSimpleName());
     }
 
     private Map<Integer, Integer> calcFollowerNumTweetsMap(

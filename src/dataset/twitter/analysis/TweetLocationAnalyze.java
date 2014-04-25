@@ -2,7 +2,6 @@ package dataset.twitter.analysis;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 
 import dataset.chart.ChartUtils;
+import dataset.utils.AnalyzeUtils;
 import dataset.utils.ConfReader;
 
 /**
@@ -25,10 +25,13 @@ import dataset.utils.ConfReader;
  *
  */
 public class TweetLocationAnalyze implements IAnalyze {
-    private static final Logger logger = LogManager.getLogger(TweetLocationAnalyze.class);
+    private static final Logger logger = LogManager
+	    .getLogger(TweetLocationAnalyze.class);
     private static final String TWEET_LOCATION_DISTRIBUTION = "3_tweet_location_distribution";
-    //[user ID, percentage of the tweets from the most tweeted timezone]
-    private final Map<BigDecimal, BigDecimal> tweetsLocationMap;
+    public static final String CACHED_TWEETS_LOCATION_FILE = "output/"
+	    + TWEET_LOCATION_DISTRIBUTION + ".txt";
+    // [user ID, percentage of the tweets from the most tweeted timezone]
+    private final Map<Integer, Double> tweetsLocationMap;
 
     public TweetLocationAnalyze() {
 	this.tweetsLocationMap = Maps.newHashMap();
@@ -36,29 +39,38 @@ public class TweetLocationAnalyze implements IAnalyze {
 
     @Override
     public void executeAnalyze() {
-	logger.info("Started to analyze tweet location...");
+	logger.info("START ANALYZE " + this.getClass().getSimpleName());
 	try {
 	    ConfReader confReader = new ConfReader();
 	    File tweetsDir = confReader.getTweetsDir();
+	    File cachedFile = new File(CACHED_TWEETS_LOCATION_FILE);
 	    if (tweetsDir.exists() && tweetsDir.isDirectory()) {
-		tweetsLocationMap.putAll(calcTweetsLocation(tweetsDir));
+		if (cachedFile.exists()) {
+		    tweetsLocationMap.putAll(AnalyzeUtils
+			    .readFromDoubleFile(cachedFile));
+		} else {
+		    tweetsLocationMap.putAll(calcTweetsLocation(tweetsDir));
+		    AnalyzeUtils.saveDoubleToFile(tweetsLocationMap,
+			    cachedFile);
+		}
 	    } else {
 		throw new Exception("Can not find dir: " + tweetsDir);
 	    }
 	} catch (Exception ex) {
-	    logger.fatal("Error on " + this.getClass().getSimpleName()
-		    + ": " + ex.getMessage());
+	    logger.fatal("Error on " + this.getClass().getSimpleName() + ": "
+		    + ex.getMessage());
 	    ex.printStackTrace();
 	}
     }
 
-    private Map<BigDecimal, BigDecimal> calcTweetsLocation(File tweetsDir) {
-	Map<BigDecimal, UserTweetsLocation> map = Maps.newHashMap();
+    private Map<Integer, Double> calcTweetsLocation(File tweetsDir) {
+	Map<Integer, UserTweetsLocation> map = Maps.newHashMap();
 	doCalcTweetsLocation(map, tweetsDir);
+	logger.debug("Done cacluate tweet location.");
 	return calcPercentage(map);
     }
 
-    private void doCalcTweetsLocation(Map<BigDecimal, UserTweetsLocation> map,
+    private void doCalcTweetsLocation(Map<Integer, UserTweetsLocation> map,
 	    File file) {
 	if (file.isDirectory()) {
 	    for (File child : file.listFiles()) {
@@ -68,9 +80,9 @@ public class TweetLocationAnalyze implements IAnalyze {
 	    try {
 		List<String> lines = Files.readLines(file,
 			Charset.defaultCharset());
-		BigDecimal currentID = BigDecimal.valueOf(Long.valueOf(file.getName()));
+		Integer currentID = Integer.valueOf(file.getName());
 		for (String line : lines) {
-		    //Parse time zone.
+		    // Parse time zone.
 		    if (line.startsWith("Time") && currentID != null) {
 			if (map.get(currentID) == null) {
 			    map.put(currentID,
@@ -105,27 +117,29 @@ public class TweetLocationAnalyze implements IAnalyze {
 		timeRecord.length() - 5);
     }
 
-    private Map<BigDecimal, BigDecimal> calcPercentage(
-	    Map<BigDecimal, UserTweetsLocation> map) {
+    private Map<Integer, Double> calcPercentage(
+	    Map<Integer, UserTweetsLocation> map) {
 
-	Map<BigDecimal, BigDecimal> percentageMap = Maps.newHashMap();
-	for (Map.Entry<BigDecimal, UserTweetsLocation> entry : map.entrySet()) {
+	Map<Integer, Double> percentageMap = Maps.newHashMap();
+	for (Map.Entry<Integer, UserTweetsLocation> entry : map.entrySet()) {
 	    percentageMap.put(entry.getKey(), entry.getValue()
 		    .calcTweetsFromOneTimeZonePercentage());
 	}
 
-	logger.debug("Caclulated percentage.");
+	logger.debug("Done caclulate percentage for tweet location distribution.");
 	return percentageMap;
     }
 
     @Override
     public void drawResult() {
+	AnalyzeUtils.printMap(tweetsLocationMap);
+	
 	logger.info("Drawing tweet location distribution...");
-	ChartUtils.drawDecimalChart("", "Tweet location distribution",
+	ChartUtils.drawDoubleChart("", "Tweet location distribution",
 		"User IDs", "Tweet location centerlization",
 		TWEET_LOCATION_DISTRIBUTION, tweetsLocationMap);
 	logger.info("Done drawing tweet location  distribution");
-
+	logger.info("DOND ANALYZE " + this.getClass().getSimpleName());
     }
 
     @Test

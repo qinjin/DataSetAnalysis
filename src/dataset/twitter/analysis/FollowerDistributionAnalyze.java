@@ -44,6 +44,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 
     @Override
     public void executeAnalyze() {
+	logger.info("START ANALYZE "+this.getClass().getSimpleName());
 	ConfReader confReader = new ConfReader();
 	try {
 	    processFollowerNumbers(confReader);
@@ -137,6 +138,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
     public void drawResult() {
 	drawFollowerNumberDistribution();
 	drawFollowerRegionDistribution();
+	logger.info("DOND ANALYZE "+this.getClass().getSimpleName());
     }
 
     private void drawFollowerNumberDistribution() {

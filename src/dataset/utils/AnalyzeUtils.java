@@ -17,7 +17,9 @@ import com.google.common.io.Files;
 import dataset.twitter.analysis.TweetLocationAnalyze;
 
 public class AnalyzeUtils {
-    private static final Logger logger = LogManager.getLogger(AnalyzeUtils.class);
+    private static final Logger logger = LogManager
+	    .getLogger(AnalyzeUtils.class);
+
     /**
      * Filter the result before drawing the plot.
      * 
@@ -105,7 +107,7 @@ public class AnalyzeUtils {
 			    file, Charset.defaultCharset());
 		}
 	    }
-	logger.info("Saved to data to file " + file);
+	    logger.info("Saved to data to file " + file);
 	} catch (Exception ex) {
 	    System.err.println("Can not save data to file: " + file.toString());
 	    ex.printStackTrace();
@@ -130,8 +132,128 @@ public class AnalyzeUtils {
 		}
 	    }
 	}
-	logger.info("Read "+map.size()+" id-followers from file");
+	logger.info("Read " + map.size() + " id-followers from file");
 	return map;
+    }
+
+    public static void saveBigDecimalToFile(
+	    final Map<Integer, BigDecimal> dataSet, final File file) {
+	Runnable saveFileThread = new Runnable() {
+	    @Override
+	    public void run() {
+		doSaveToBigDecimalFile(dataSet, file);
+	    }
+
+	    private void doSaveToBigDecimalFile(
+		    Map<Integer, BigDecimal> dataSet, File file) {
+		try {
+		    boolean first = true;
+		    for (Map.Entry<Integer, BigDecimal> entry : dataSet
+			    .entrySet()) {
+			if (first) {
+			    Files.append(
+				    entry.getKey() + "=" + entry.getValue(),
+				    file, Charset.defaultCharset());
+			    first = false;
+			} else {
+			    Files.append(
+				    ";" + entry.getKey() + "="
+					    + entry.getValue(), file,
+				    Charset.defaultCharset());
+			}
+		    }
+		    logger.info("Saved to data to file " + file);
+		} catch (Exception ex) {
+		    System.err.println("Can not save data to file: "
+			    + file.toString());
+		    ex.printStackTrace();
+		}
+	    }
+	};
+
+	saveFileThread.run();
+    }
+
+    public static Map<Integer, BigDecimal> readFromBigDecimalFile(File file)
+	    throws IOException {
+	Map<Integer, BigDecimal> dataSet = Maps.newHashMap();
+	List<String> lines = Files.readLines(file, Charset.defaultCharset());
+	for (String line : lines) {
+	    String[] splited = line.split(";");
+	    logger.debug(file.getName() + " splited length: " + splited.length);
+	    for (String str : splited) {
+		String[] pair = str.split("=");
+		if (pair.length == 2) {
+		    dataSet.put(Integer.valueOf(pair[0]),
+			    BigDecimal.valueOf(Double.valueOf(pair[0])));
+		}
+	    }
+	}
+	return dataSet;
+    }
+
+    public static Map<Integer, Double> readFromDoubleFile(File file)
+	    throws IOException {
+	Map<Integer, Double> dataSet = Maps.newHashMap();
+	List<String> lines = Files.readLines(file, Charset.defaultCharset());
+	for (String line : lines) {
+	    String[] splited = line.split(";");
+	    logger.debug(file.getName() + " splited length: " + splited.length);
+	    for (String str : splited) {
+		String[] pair = str.split("=");
+		if (pair.length == 2) {
+		    dataSet.put(Integer.valueOf(pair[0]),
+			    Double.valueOf(pair[0]));
+		}
+	    }
+	}
+	return dataSet;
+    }
+
+    public static void printMap(Map<? extends Object, ? extends Object> map) {
+	logger.debug("Debug map:");
+	for (Map.Entry<? extends Object, ? extends Object> entry : map
+		.entrySet()) {
+	    System.out.println(entry.getKey() + "<->" + entry.getValue());
+	}
+    }
+
+    public static void saveDoubleToFile(final Map<Integer, Double> dataSet,
+	    final File file) {
+	Runnable saveFileThread = new Runnable() {
+	    @Override
+	    public void run() {
+		doSaveToDoubleFile(dataSet, file);
+	    }
+
+	    private void doSaveToDoubleFile(Map<Integer, Double> dataSet,
+		    File file) {
+		try {
+		    boolean first = true;
+		    for (Map.Entry<Integer, Double> entry : dataSet.entrySet()) {
+			if (first) {
+			    Files.append(
+				    entry.getKey() + "=" + entry.getValue(),
+				    file, Charset.defaultCharset());
+			    first = false;
+			} else {
+			    Files.append(
+				    ";" + entry.getKey() + "="
+					    + entry.getValue(), file,
+				    Charset.defaultCharset());
+			}
+		    }
+		    logger.info("Saved to data to file " + file);
+		} catch (Exception ex) {
+		    System.err.println("Can not save data to file: "
+			    + file.toString());
+		    ex.printStackTrace();
+		}
+	    }
+	};
+
+	saveFileThread.run();
+
     }
 
     // public static Map<BigDecimal, BigDecimal> simplefilter(int keyMax, int
