@@ -28,6 +28,7 @@ public class TweetLocationAnalyze implements IAnalyze {
     private static final Logger logger = LogManager
 	    .getLogger(TweetLocationAnalyze.class);
     private static final String TWEET_LOCATION_DISTRIBUTION = "3_tweet_location_distribution";
+    private static final String TWEET_LOCATION_PERCENTAGE = "3_tweet_location_percentage";
     public static final String CACHED_TWEETS_LOCATION_FILE = "output/"
 	    + TWEET_LOCATION_DISTRIBUTION + ".txt";
     // [user ID, percentage of the tweets from the most tweeted timezone]
@@ -50,8 +51,8 @@ public class TweetLocationAnalyze implements IAnalyze {
 			    .readFromDoubleFile(cachedFile));
 		} else {
 		    tweetsLocationMap.putAll(calcTweetsLocation(tweetsDir));
-		    AnalyzeUtils.saveDoubleToFile(tweetsLocationMap,
-			    cachedFile);
+		    AnalyzeUtils
+			    .saveDoubleToFile(tweetsLocationMap, cachedFile);
 		}
 	    } else {
 		throw new Exception("Can not find dir: " + tweetsDir);
@@ -132,14 +133,53 @@ public class TweetLocationAnalyze implements IAnalyze {
 
     @Override
     public void drawResult() {
-	AnalyzeUtils.printMap(tweetsLocationMap);
-	
+	// AnalyzeUtils.printMap(tweetsLocationMap);
+	// Draw raw chart for location distribution.
 	logger.info("Drawing tweet location distribution...");
 	ChartUtils.drawDoubleChart("", "Tweet location distribution",
 		"User IDs", "Tweet location centerlization",
 		TWEET_LOCATION_DISTRIBUTION, tweetsLocationMap);
+
+	// Draw aggregated chart for the percentages.
+	Map<Integer, Integer> aggMap = aggTweetsLocationNums(tweetsLocationMap);
+	AnalyzeUtils.printMap(aggMap);
+	ChartUtils.drawBarChart("", "Aggregated tweet location distribution",
+		"Probabilities of tweeting in the same time-zone",
+		"Number of users", TWEET_LOCATION_PERCENTAGE,
+		aggMap);
 	logger.info("Done drawing tweet location  distribution");
 	logger.info("DOND ANALYZE " + this.getClass().getSimpleName());
+    }
+
+    // The aggregated maps is [the probabilities, the numbers]
+    private Map<Integer, Integer> aggTweetsLocationNums(Map<Integer, Double> map) {
+	Map<Integer, Integer> result = Maps.newHashMap();
+	for (Map.Entry<Integer, Double> entry : map.entrySet()) {
+	    int probablity = (int) (entry.getValue() * 100);
+	    roundAndSaveValue(result, probablity);
+	}
+	return result;
+    }
+
+    private void roundAndSaveValue(Map<Integer, Integer> map,
+	    int valueBeforeRound) {
+	if (valueBeforeRound > 100) {
+	    logger.warn("Invalid probability: " + valueBeforeRound);
+	    return;
+	}
+
+	if (valueBeforeRound % 10 > 4) {
+	    valueBeforeRound = valueBeforeRound + (10 - valueBeforeRound % 10);
+	} else {
+	    valueBeforeRound = valueBeforeRound - valueBeforeRound % 10;
+	}
+
+	if (map.get(valueBeforeRound) == null) {
+	    map.put(valueBeforeRound, 1);
+	} else {
+	    int newNum = map.get(valueBeforeRound) + 1;
+	    map.put(valueBeforeRound, newNum);
+	}
     }
 
     @Test

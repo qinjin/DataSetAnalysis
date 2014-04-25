@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -19,6 +22,9 @@ import org.jfree.data.xy.XYSeriesCollection;
  *
  */
 public class ChartUtils {
+    private static final Logger logger = LogManager
+	    .getLogger(ChartUtils.class);
+
     /**
      * Draw a chart with specified name, title, x-axis, y-axis, exported, and
      * dataSet. The data set should be a map with <x-axis value, y-axis value>
@@ -107,8 +113,48 @@ public class ChartUtils {
 	    ChartUtilities.saveChartAsPNG(new File("output" + File.separator
 		    + exportedFileName + ".png"), chart, 1000, 600);
 	} catch (IOException e) {
-	    System.err.println("Problem occurred creating chart: "
-		    + e.getMessage());
+	    logger.fatal("Problem occurred creating chart: " + e.getMessage());
+	    e.printStackTrace();
+	}
+    }
+
+    /**
+     * Draw a bar chart with specified name, title, x-axis, y-axis, exported,
+     * and dataSet. The data set should be a map with <x-axis value, y-axis
+     * value>.
+     * 
+     * @param chartName
+     * @param title
+     * @param xAxisName
+     * @param yAxisName
+     * @param exportedFileName
+     * @param dataSet
+     */
+    public static void drawBarChart(String chartName, String title,
+	    String xAxisName, String yAxisName, String exportedFileName,
+	    Map<Integer, Integer> dataSet) {
+	DefaultCategoryDataset dcd = new DefaultCategoryDataset();
+
+	for (int i = 0; i < 110; i += 10) {
+	    int value = dataSet.get(i) == null ? 0 : dataSet.get(i);
+	    dcd.setValue(value,yAxisName,  String.valueOf(i));
+	}
+
+	doDrawBarChart(chartName, title, xAxisName, yAxisName,
+		exportedFileName, dcd);
+
+    }
+
+    private static void doDrawBarChart(String chartName, String title,
+	    String xAxisName, String yAxisName, String exportedFileName,
+	    DefaultCategoryDataset dcd) {
+	JFreeChart chart = ChartFactory.createBarChart3D(title, xAxisName,
+		yAxisName, dcd, PlotOrientation.VERTICAL, false, true, false);
+	try {
+	    ChartUtilities.saveChartAsPNG(new File("output" + File.separator
+		    + exportedFileName + ".png"), chart, 1000, 600);
+	} catch (IOException e) {
+	    logger.fatal("Problem occurred creating chart: " + e.getMessage());
 	    e.printStackTrace();
 	}
     }

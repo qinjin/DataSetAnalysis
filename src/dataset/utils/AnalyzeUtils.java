@@ -185,7 +185,7 @@ public class AnalyzeUtils {
 		String[] pair = str.split("=");
 		if (pair.length == 2) {
 		    dataSet.put(Integer.valueOf(pair[0]),
-			    BigDecimal.valueOf(Double.valueOf(pair[0])));
+			    BigDecimal.valueOf(Double.valueOf(pair[1])));
 		}
 	    }
 	}
@@ -203,7 +203,7 @@ public class AnalyzeUtils {
 		String[] pair = str.split("=");
 		if (pair.length == 2) {
 		    dataSet.put(Integer.valueOf(pair[0]),
-			    Double.valueOf(pair[0]));
+			    Double.valueOf(pair[1]));
 		}
 	    }
 	}
