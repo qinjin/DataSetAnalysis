@@ -114,7 +114,7 @@ public class AnalyzeUtils {
 	}
     }
 
-    public static Map<? extends Integer, ? extends List<Integer>> readAggratedFromFile(
+    public static Map<Integer, List<Integer>> readAggratedFromFile(
 	    File file, String splitRegex) throws IOException {
 	Map<Integer, List<Integer>> map = Maps.newHashMap();
 	List<String> lines = Files.readLines(file, Charset.defaultCharset());

@@ -12,9 +12,6 @@ Three assumptions are analyzed and proved:
 3. Users are always tweet from the same data center.
 
 In order to run the first analyze, we group the cities in US into time zones. The us_cities database (http://simplemaps.com/cities-data) must be created and the database/us_cities.sql must be imported to the databaese. 
-Create database by the following command:
-	create database us_cities;
-	grant all privileges on us_cities.* to us_cities identified by "us_cities";
 	
 Run the analyze from:
 AnalysisMain.java

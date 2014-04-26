@@ -132,10 +132,10 @@ public class ChartUtils {
      */
     public static void drawBarChart(String chartName, String title,
 	    String xAxisName, String yAxisName, String exportedFileName,
-	    Map<Integer, Integer> dataSet) {
+	    Map<Integer, Integer> dataSet, int interval, int max) {
 	DefaultCategoryDataset dcd = new DefaultCategoryDataset();
 
-	for (int i = 0; i < 110; i += 10) {
+	for (int i = 0; i < max; i += interval) {
 	    int value = dataSet.get(i) == null ? 0 : dataSet.get(i);
 	    dcd.setValue(value,yAxisName,  String.valueOf(i));
 	}

@@ -13,9 +13,9 @@ public class AnalysisMain {
 	public static void main(String[] args){
 		
 		List<IAnalyze> analysis = Lists.newArrayList();
-//		analysis.add(new FollowerDistributionAnalyze());
+		analysis.add(new FollowerDistributionAnalyze());
 //		analysis.add(new NumTweetsAnalyze());
-		analysis.add(new TweetLocationAnalyze());
+//		analysis.add(new TweetLocationAnalyze());
 		
 		for(IAnalyze analyze: analysis){
 			analyze.executeAnalyze();

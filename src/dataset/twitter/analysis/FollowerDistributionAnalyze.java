@@ -2,8 +2,10 @@ package dataset.twitter.analysis;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,7 +27,8 @@ import dataset.utils.AnalyzeUtils;
  *
  */
 public class FollowerDistributionAnalyze implements IAnalyze {
-    private static final Logger logger = LogManager.getLogger(FollowerDistributionAnalyze.class);
+    private static final Logger logger = LogManager
+	    .getLogger(FollowerDistributionAnalyze.class);
     public static final String FOLLOWER_NUMBER = "1_follower_number_distribution";
     public static final String FOLLOWER_REGION = "1_follower_region_distribution";
     public static final String CACHED_FOLLOWER_NUMBER_FILE = "output/"
@@ -34,7 +37,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 	    + FOLLOWER_REGION + ".txt";
     // [Num followers, Num users]
     private final Map<Integer, Integer> followerNumberDistribution;
-    // [Num followers, Num regions]
+    // [Aggregated num followers, Num regions]
     Map<Integer, Integer> followerRegionDistribution;
 
     public FollowerDistributionAnalyze() {
@@ -44,7 +47,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 
     @Override
     public void executeAnalyze() {
-	logger.info("START ANALYZE "+this.getClass().getSimpleName());
+	logger.info("START ANALYZE " + this.getClass().getSimpleName());
 	ConfReader confReader = new ConfReader();
 	try {
 	    processFollowerNumbers(confReader);
@@ -89,7 +92,7 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 		final Map<Integer, List<Integer>> followersNetwork = Maps
 			.newConcurrentMap();
 		processFollowerNetwork(networkDir, followersNetwork);
-		followerRegionDistribution.putAll(calcFollowerRegions(
+		followerRegionDistribution.putAll(calcAggFollowerRegions(
 			allProfiles, followersNetwork));
 		AnalyzeUtils.saveToFile(followerRegionDistribution,
 			followerRegionFile);
@@ -103,7 +106,6 @@ public class FollowerDistributionAnalyze implements IAnalyze {
     private void processFollowerNetwork(File networkDir,
 	    final Map<Integer, List<Integer>> followersNetwork)
 	    throws InterruptedException {
-
 	final ExecutorService executor = Executors.newCachedThreadPool();
 	final CountDownLatch latch = new CountDownLatch(
 		networkDir.list().length);
@@ -115,8 +117,9 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 		@Override
 		public void run() {
 		    try {
-			followersNetwork.putAll(AnalyzeUtils
-				.readAggratedFromFile(file, "\t"));
+			Map<Integer, List<Integer>> aggResult = AnalyzeUtils
+				.readAggratedFromFile(file, "\t");
+			followersNetwork.putAll(aggResult);
 		    } catch (IOException e) {
 			logger.fatal("Error on read aggragated id-followers");
 			e.printStackTrace();
@@ -127,49 +130,62 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 	    };
 
 	    executor.execute(task);
+	    
+//	    try {
+//		Map<Integer, List<Integer>> aggResult = AnalyzeUtils
+//			.readAggratedFromFile(file, "\t");
+//		followersNetwork.putAll(aggResult);
+//	    } catch (IOException e) {
+//		logger.fatal("Error on read aggragated id-followers");
+//		e.printStackTrace();
+//	    }
 	}
 
 	latch.await();
 	executor.shutdown();
-	logger.info("Done to process all follower network files");
+	logger.info("Done process all follower network files");
     }
 
     @Override
     public void drawResult() {
 	drawFollowerNumberDistribution();
 	drawFollowerRegionDistribution();
-	logger.info("DOND ANALYZE "+this.getClass().getSimpleName());
+	logger.info("DONE ANALYZE " + this.getClass().getSimpleName());
     }
 
     private void drawFollowerNumberDistribution() {
 	logger.info("Drawing follower number distribution...");
 	ChartUtils.drawChart("", "Follower number distribution",
-		"Number of followers", "Number of users",
-		FOLLOWER_NUMBER, AnalyzeUtils.simplefilter(-1,
-			-1, -1, 1, followerNumberDistribution));
+		"Number of followers", "Number of users", FOLLOWER_NUMBER,
+		AnalyzeUtils.simplefilter(-1, -1, -1, 1,
+			followerNumberDistribution));
 	// Filter to remove the follower number is bigger than 1999 and the user
 	// number is smaller than 2.
 	ChartUtils.drawChart("", "Follower number distribution",
-		"Number of followers", "Number of users",
-		FOLLOWER_NUMBER+"_0_2000", AnalyzeUtils
-			.simplefilter(2000, -1, -1, 1,
-				followerNumberDistribution));
+		"Number of followers", "Number of users", FOLLOWER_NUMBER
+			+ "_0_2000", AnalyzeUtils.simplefilter(2000, -1, -1, 1,
+			followerNumberDistribution));
 	logger.info("Done drawing follower number distribution");
     }
 
     private void drawFollowerRegionDistribution() {
 	logger.info("Drawing follower region distribution...");
 	ChartUtils.drawChart("", "Follower region distribution",
-		"Number of followers", "Number of regions",
-		FOLLOWER_REGION, AnalyzeUtils.simplefilter(-1,
-			-1, -1, 1, followerRegionDistribution));
+		"Number of followers", "Number of regions", FOLLOWER_REGION,
+		AnalyzeUtils.simplefilter(-1, -1, -1, 1,
+			followerRegionDistribution));
 	// Filter to remove the follower number is bigger than 1999 and the user
 	// number is smaller than 2.
 	ChartUtils.drawChart("", "Follower region distribution",
-		"Number of followers", "Number of regions",
-		FOLLOWER_REGION+"_0_2000", AnalyzeUtils
-			.simplefilter(2000, -1, -1, 1,
-				followerRegionDistribution));
+		"Number of followers", "Number of regions", FOLLOWER_REGION
+			+ "_0_2000", AnalyzeUtils.simplefilter(2000, -1, -1, 1,
+			followerRegionDistribution));
+
+	ChartUtils.drawBarChart("", "Follower region distribution",
+		"Number of followers", "Number of regions", FOLLOWER_REGION
+			+ "_bar_0_2000", AnalyzeUtils.simplefilter(2000, -1,
+			-1, 1, followerRegionDistribution), 100, 2100);
+
 	logger.info("Done drawing follower region distribution");
     }
 
@@ -227,6 +243,81 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 		    entry.getValue() / counterMap.get(entry.getKey()));
 	}
 	return resultMap;
+    }
+
+    private Map<Integer, Integer> calcAggFollowerRegions(
+	    List<UserProfiler> allProfiles,
+	    Map<Integer, List<Integer>> followersNetwork) {
+	Map<Integer, Integer> resultMap = Maps.newHashMap();
+	Map<Integer, Integer> followersRegionMap = Maps.newHashMap();
+	Map<Integer, Integer> counterMap = Maps.newHashMap();
+	Map<Integer, String> idRegionMap = createIDRegionMap(allProfiles);
+
+	for (Map.Entry<Integer, List<Integer>> entry : followersNetwork
+		.entrySet()) {
+	    Integer id = entry.getKey();
+	    List<Integer> followersID = entry.getValue();
+	    int numFollowers = followersID.size();
+	    if (followersRegionMap.get(followersID.size()) == null) {
+		counterMap.put(numFollowers, 1);
+		followersRegionMap.put(numFollowers,
+			calcNumDifferentRegion(id, followersID, idRegionMap));
+	    } else {
+		int newCounter = counterMap.get(numFollowers) + 1;
+		counterMap.put(numFollowers, newCounter);
+		int numAvgFromOtherRegions = followersRegionMap.get(followersID
+			.size())
+			+ calcNumDifferentRegion(id, followersID, idRegionMap);
+		followersRegionMap.put(numFollowers, numAvgFromOtherRegions);
+	    }
+	}
+
+	for (Map.Entry<Integer, Integer> entry : followersRegionMap.entrySet()) {
+	    int key = entry.getKey();
+	    // Round the aggregated key.
+	    if (key % 100 > 50) {
+		key = key + (100 - key % 100);
+	    } else {
+		key = key - key % 100;
+	    }
+
+	    if (resultMap.get(key) == null) {
+		resultMap.put(key, entry.getValue());
+	    } else {
+		int newValue = resultMap.get(key) + entry.getValue();
+		resultMap.put(key, newValue);
+	    }
+	}
+	
+	Iterator<Entry<Integer, Integer>> iter = resultMap.entrySet().iterator();
+	while(iter.hasNext()){
+	    Entry<Integer, Integer> next = iter.next();
+	    next.setValue(next.getValue() / counterMap.get(next.getKey()));
+	}
+	
+	return resultMap;
+    }
+
+    // Aggregate per 100.
+    private Map<Integer, Integer> aggregate(Map<Integer, Integer> map) {
+	Map<Integer, Integer> aggMap = Maps.newHashMap();
+	for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+	    int key = entry.getKey();
+	    // Round the aggregated key.
+	    if (key % 100 > 50) {
+		key = key + (100 - key % 100);
+	    } else {
+		key = key - key % 100;
+	    }
+
+	    if (aggMap.get(key) == null) {
+		aggMap.put(key, entry.getValue());
+	    } else {
+		int newValue = aggMap.get(key) + entry.getValue();
+		aggMap.put(key, newValue);
+	    }
+	}
+	return aggMap;
     }
 
     private Map<Integer, String> createIDRegionMap(

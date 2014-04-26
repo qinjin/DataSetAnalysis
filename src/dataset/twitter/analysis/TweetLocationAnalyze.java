@@ -146,7 +146,7 @@ public class TweetLocationAnalyze implements IAnalyze {
 	ChartUtils.drawBarChart("", "Aggregated tweet location distribution",
 		"Probabilities of tweeting in the same time-zone",
 		"Number of users", TWEET_LOCATION_PERCENTAGE,
-		aggMap);
+		aggMap, 10, 110);
 	logger.info("Done drawing tweet location  distribution");
 	logger.info("DOND ANALYZE " + this.getClass().getSimpleName());
     }
@@ -167,7 +167,7 @@ public class TweetLocationAnalyze implements IAnalyze {
 	    logger.warn("Invalid probability: " + valueBeforeRound);
 	    return;
 	}
-
+	
 	if (valueBeforeRound % 10 > 4) {
 	    valueBeforeRound = valueBeforeRound + (10 - valueBeforeRound % 10);
 	} else {
