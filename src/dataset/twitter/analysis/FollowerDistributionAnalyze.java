@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,6 +15,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import dataset.chart.ChartUtils;
 import dataset.db.DBProvider;
@@ -172,19 +174,24 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 	logger.info("Drawing follower region distribution...");
 	ChartUtils.drawChart("", "Follower region distribution",
 		"Number of followers", "Number of regions", FOLLOWER_REGION,
-		AnalyzeUtils.simplefilter(-1, -1, -1, 1,
+		AnalyzeUtils.simplefilter(-1, -1, -1, -1,
 			followerRegionDistribution));
 	// Filter to remove the follower number is bigger than 1999 and the user
 	// number is smaller than 2.
 	ChartUtils.drawChart("", "Follower region distribution",
 		"Number of followers", "Number of regions", FOLLOWER_REGION
-			+ "_0_2000", AnalyzeUtils.simplefilter(2000, -1, -1, 1,
+			+ "_0_2000", AnalyzeUtils.simplefilter(2000, -1, -1, -1,
 			followerRegionDistribution));
 
 	ChartUtils.drawBarChart("", "Follower region distribution",
 		"Number of followers", "Number of regions", FOLLOWER_REGION
-			+ "_bar_0_2000", AnalyzeUtils.simplefilter(2000, -1,
-			-1, 1, followerRegionDistribution), 100, 2100);
+			+ "_bar_0_2000", AnalyzeUtils.simplefilter(-1, -1,
+			-1, -1, followerRegionDistribution), 100, 2000);
+	
+	ChartUtils.drawBarChart("", "Follower region distribution",
+		"Number of followers", "Number of regions", FOLLOWER_REGION
+			+ "_bar", AnalyzeUtils.simplefilter(-1, -1,
+			-1, -1, followerRegionDistribution), 100, 12000);
 
 	logger.info("Done drawing follower region distribution");
     }
@@ -211,46 +218,48 @@ public class FollowerDistributionAnalyze implements IAnalyze {
      * Calculate follower region distribution which will return [Number
      * followers, Number follower from another region]
      */
-    private Map<Integer, Integer> calcFollowerRegions(
-	    List<UserProfiler> allProfiles,
-	    Map<Integer, List<Integer>> followersNetwork) {
-	Map<Integer, Integer> resultMap = Maps.newHashMap();
-	Map<Integer, Integer> followersRegionMap = Maps.newHashMap();
-	Map<Integer, Integer> counterMap = Maps.newHashMap();
-	Map<Integer, String> idRegionMap = createIDRegionMap(allProfiles);
-
-	for (Map.Entry<Integer, List<Integer>> entry : followersNetwork
-		.entrySet()) {
-	    Integer id = entry.getKey();
-	    List<Integer> followersID = entry.getValue();
-	    int numFollowers = followersID.size();
-	    if (followersRegionMap.get(followersID.size()) == null) {
-		counterMap.put(numFollowers, 1);
-		followersRegionMap.put(numFollowers,
-			calcNumDifferentRegion(id, followersID, idRegionMap));
-	    } else {
-		int newCounter = counterMap.get(numFollowers) + 1;
-		counterMap.put(numFollowers, newCounter);
-		int numAvgFromOtherRegions = followersRegionMap.get(followersID
-			.size())
-			+ calcNumDifferentRegion(id, followersID, idRegionMap);
-		followersRegionMap.put(numFollowers, numAvgFromOtherRegions);
-	    }
-	}
-
-	for (Map.Entry<Integer, Integer> entry : followersRegionMap.entrySet()) {
-	    resultMap.put(entry.getKey(),
-		    entry.getValue() / counterMap.get(entry.getKey()));
-	}
-	return resultMap;
-    }
+//    private Map<Integer, Integer> calcFollowerRegions(
+//	    List<UserProfiler> allProfiles,
+//	    Map<Integer, List<Integer>> followersNetwork) {
+//	Map<Integer, Integer> resultMap = Maps.newHashMap();
+//	Map<Integer, Integer> followersRegionMap = Maps.newHashMap();
+//	Map<Integer, Integer> counterMap = Maps.newHashMap();
+//	Map<Integer, String> idRegionMap = createIDRegionMap(allProfiles);
+//
+//	for (Map.Entry<Integer, List<Integer>> entry : followersNetwork
+//		.entrySet()) {
+//	    Integer id = entry.getKey();
+//	    List<Integer> followersID = entry.getValue();
+//	    int numFollowers = followersID.size();
+//	    if (followersRegionMap.get(followersID.size()) == null) {
+//		counterMap.put(numFollowers, 1);
+//		followersRegionMap.put(numFollowers,
+//			calcNumDifferentRegion(id, followersID, idRegionMap));
+//	    } else {
+//		int newCounter = counterMap.get(numFollowers) + 1;
+//		counterMap.put(numFollowers, newCounter);
+//		int numAvgFromOtherRegions = followersRegionMap.get(followersID
+//			.size())
+//			+ calcNumDifferentRegion(id, followersID, idRegionMap);
+//		followersRegionMap.put(numFollowers, numAvgFromOtherRegions);
+//	    }
+//	}
+//
+//	for (Map.Entry<Integer, Integer> entry : followersRegionMap.entrySet()) {
+//	    resultMap.put(entry.getKey(),
+//		    entry.getValue() / counterMap.get(entry.getKey()));
+//	}
+//	return resultMap;
+//    }
 
     private Map<Integer, Integer> calcAggFollowerRegions(
 	    List<UserProfiler> allProfiles,
 	    Map<Integer, List<Integer>> followersNetwork) {
-	Map<Integer, Integer> resultMap = Maps.newHashMap();
-	Map<Integer, Integer> followersRegionMap = Maps.newHashMap();
+	Map<Integer, Set<String>> aggFollowerRegionMap = Maps.newHashMap();
+	Map<Integer, Set<String>> followersRegionMap = Maps.newHashMap();
 	Map<Integer, Integer> counterMap = Maps.newHashMap();
+	Map<Integer, Integer> aggCounterMap = Maps.newHashMap();
+	Map<Integer, Integer> resultMap = Maps.newHashMap();
 	Map<Integer, String> idRegionMap = createIDRegionMap(allProfiles);
 
 	for (Map.Entry<Integer, List<Integer>> entry : followersNetwork
@@ -258,21 +267,18 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 	    Integer id = entry.getKey();
 	    List<Integer> followersID = entry.getValue();
 	    int numFollowers = followersID.size();
-	    if (followersRegionMap.get(followersID.size()) == null) {
+	    if (followersRegionMap.get(numFollowers) == null) {
 		counterMap.put(numFollowers, 1);
 		followersRegionMap.put(numFollowers,
-			calcNumDifferentRegion(id, followersID, idRegionMap));
+			getDifferentRegions(id, followersID, idRegionMap));
 	    } else {
 		int newCounter = counterMap.get(numFollowers) + 1;
 		counterMap.put(numFollowers, newCounter);
-		int numAvgFromOtherRegions = followersRegionMap.get(followersID
-			.size())
-			+ calcNumDifferentRegion(id, followersID, idRegionMap);
-		followersRegionMap.put(numFollowers, numAvgFromOtherRegions);
+		followersRegionMap.get(numFollowers).addAll(getDifferentRegions(id, followersID, idRegionMap));
 	    }
 	}
 
-	for (Map.Entry<Integer, Integer> entry : followersRegionMap.entrySet()) {
+	for (Map.Entry<Integer, Set<String>> entry : followersRegionMap.entrySet()) {
 	    int key = entry.getKey();
 	    // Round the aggregated key.
 	    if (key % 100 > 50) {
@@ -281,18 +287,41 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 		key = key - key % 100;
 	    }
 
-	    if (resultMap.get(key) == null) {
-		resultMap.put(key, entry.getValue());
+	    if (aggFollowerRegionMap.get(key) == null) {
+		aggFollowerRegionMap.put(key, entry.getValue());
 	    } else {
-		int newValue = resultMap.get(key) + entry.getValue();
-		resultMap.put(key, newValue);
+		aggFollowerRegionMap.get(key).addAll(entry.getValue());
 	    }
 	}
 	
-	Iterator<Entry<Integer, Integer>> iter = resultMap.entrySet().iterator();
+	for (Map.Entry<Integer,Integer> entry : counterMap.entrySet()) {
+	    int key = entry.getKey();
+	    // Round the aggregated key.
+	    if (key % 100 > 50) {
+		key = key + (100 - key % 100);
+	    } else {
+		key = key - key % 100;
+	    }
+
+	    if (aggCounterMap.get(key) == null) {
+		aggCounterMap.put(key, entry.getValue());
+	    } else {
+		int newCounter = aggCounterMap.get(key)+entry.getValue();
+		aggCounterMap.put(key, newCounter);
+	    }
+	}
+	
+	
+	Iterator<Entry<Integer, Set<String>>> iter = aggFollowerRegionMap.entrySet().iterator();
 	while(iter.hasNext()){
-	    Entry<Integer, Integer> next = iter.next();
-	    next.setValue(next.getValue() / counterMap.get(next.getKey()));
+	    Entry<Integer, Set<String>> next = iter.next();
+	    if(aggCounterMap.get(next.getKey())!=null){
+		int value = next.getValue().size()/aggCounterMap.get(next.getKey()) == 0? 1: next.getValue().size()/aggCounterMap.get(next.getKey());
+		resultMap.put(next.getKey(), value);
+	    }else{
+		logger.fatal("A key not found in counter map: "+next.getKey());
+	    }
+	    
 	}
 	
 	return resultMap;
@@ -342,5 +371,18 @@ public class FollowerDistributionAnalyze implements IAnalyze {
 	    }
 	}
 	return otherRegionsMap.size();
+    }
+    
+    private Set<String> getDifferentRegions(Integer id,
+	    List<Integer> followersID, Map<Integer, String> idRegionMap) {
+	String userRegion = idRegionMap.get(id);
+	Set<String> regions = Sets.newHashSet();
+	for (Integer followerId : followersID) {
+	    String followerRegion = idRegionMap.get(followerId);
+	    if (userRegion != null && !userRegion.equals(followerRegion)) {
+		regions.add(followerRegion);
+	    }
+	}
+	return regions;
     }
 }
