@@ -137,12 +137,25 @@ public class ChartUtils {
 
 	for (int i = 0; i < max; i += interval) {
 	    int value = dataSet.get(i) == null ? 0 : dataSet.get(i);
-	    dcd.setValue(value,yAxisName,  String.valueOf(i));
+	    dcd.setValue(value, yAxisName, String.valueOf(i));
 	}
 
 	doDrawBarChart(chartName, title, xAxisName, yAxisName,
 		exportedFileName, dcd);
 
+    }
+    
+
+    public static void drawBarChart(String chartName, String title,
+	    String xAxisName, String yAxisName, String exportedFileName,
+	    Map<Integer, Integer> dataSet) {
+	DefaultCategoryDataset dcd = new DefaultCategoryDataset();
+	for (Map.Entry<Integer, Integer> entry: dataSet.entrySet()) {
+	    dcd.setValue(entry.getValue(), yAxisName,  entry.getKey());
+	}
+
+	doDrawBarChart(chartName, title, xAxisName, yAxisName,
+		exportedFileName, dcd);
     }
 
     private static void doDrawBarChart(String chartName, String title,
